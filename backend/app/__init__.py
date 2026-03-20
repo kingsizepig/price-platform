@@ -12,7 +12,8 @@ def create_app():
     app = Flask(__name__, static_folder='static', static_url_path='')
     
     # 配置数据库
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', 'sqlite:////root/.openclaw/workspace/projects/price-platform/backend/app.db')
+    basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', f'sqlite:///{basedir}/../app.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
     
@@ -36,5 +37,15 @@ def create_app():
     @app.route('/')
     def index():
         return send_from_directory(app.static_folder, 'index.html')
+    
+    # 管理后台
+    @app.route('/admin')
+    @app.route('/admin/')
+    def admin():
+        return send_from_directory(os.path.join(app.static_folder, 'admin'), 'index.html')
+    
+    @app.route('/admin/<path:path>')
+    def admin_static(path):
+        return send_from_directory(os.path.join(app.static_folder, 'admin'), path)
     
     return app
